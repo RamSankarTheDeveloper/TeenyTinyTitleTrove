@@ -1,1 +1,7 @@
 spacy
+pyphen
+gTTS
+python-vlc
+librosa
+pyttsx3
+fastdtw

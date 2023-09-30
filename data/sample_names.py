@@ -1,1 +1,1 @@
-sample_names_List = ['levik','vrindh','levin','ishaan']
+sample_names_List = ['vrindh']
