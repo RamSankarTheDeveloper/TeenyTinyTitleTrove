@@ -1,147 +1,82 @@
-import pyttsx3 #replace it to librosa
+import pyttsx3
 import os
 import librosa
 import numpy as np
 from fastdtw import fastdtw
-from book_reader import TextProcessor
+from book_reader import WordCollector
 import json
+import utils
+from gtts import gTTS 
 
-class audio_converter():
-    def __init__(self, word='',is_sample_name=False) -> None:
-        self.word = word.lower()
-        self.file_name = f"{self.word}.wav"
-        if is_sample_name == True:
-            self.destination_path = os.path.join(r"data\audio_data\sample_audio_data", self.file_name)# change to join format for cross platform compatibility
-        if is_sample_name == False:
-            self.destination_path = os.path.join(r"data\audio_data\doc_audio_data", self.file_name)
-        self.convert_to_audio()
-        self.move_audiofile_to_subfolder()
-        self.load_MFCC()
+def save_modelnames_in_json(data):
+    utils.save_as_json(data=data,
+                        file_name= 'model_names',
+                        subdirectory= os.path.join('data','model_names'))
+#save_names_in_json()
 
+class main():
+    def collect_saved_names(self):
+        self.given_names_list = utils.extract_data_from_json(r"data\model_names\model_names.json")
+        print("given names count in list= ",self.given_names_list)
+        self.collected_names_list = utils.extract_data_from_json(r"data\collected words\person_names.json")
+        print("collected names count in list= ",self.collected_names_list)
+        #word_comparer = utils.WordsComparer()
 
-    def convert_to_audio(self):
-        engine = pyttsx3.init()
-        engine.save_to_file(self.word, f"{self.word}.wav")
-        engine.runAndWait()
+    def audio_saver(self): #remove dependency on self to be standalone
+        for each_given_name in self.given_names_list:
+            utils.AudioConverter(word= each_given_name, engine= 'gtts', save_directory=['data','audio data','given name audio data']).process()
+        for each_collected_name in self.collected_names_list:
+            utils.AudioConverter(word= each_collected_name, engine= 'gtts', save_directory=['data','audio data','collected name audio data']).process()
 
-    def move_audiofile_to_subfolder(self):
-        source_path = self.file_name
+    def create_comparison_dictionary(self):
+        output_dict = {}
+        print("comparing..")
+        for each_givenname_audio_filepath in utils.return_each_files_path(subfolder_path=os.path.join("data","audio data","given name audio data")):#make a an object of this function with intent specified. the intent is to get given names from the audio folders sincve there could be losses in between the list of names and audio saves
+            each_givenname = each_givenname_audio_filepath.replace('.wav', "")
+            each_givenname = each_givenname.replace("data\\audio data\\given name audio data\\", "")
+            print(each_givenname)
+            output_dict[each_givenname] = {}  # Initialize an empty dictionary for each given name
+            for each_collectedname_audio_filepath in utils.return_each_files_path(subfolder_path=os.path.join("data","audio data","collected name audio data")):
+                each_collectedname = each_collectedname_audio_filepath.replace('.wav', "")
+                each_collectedname = each_collectedname.replace("data\\audio data\\collected name audio data\\", "")
+                comparison_value = utils.WordsComparer(each_givenname_audio_filepath, each_collectedname_audio_filepath).process()
+                output_dict[each_givenname][each_collectedname] = comparison_value         
+        #print(output_dict)
 
-        try:
-        # Use os.rename to move the file to the subfolder
-            os.rename(source_path, self.destination_path)
-        except:
-            pass
+        #utils.save_as_json(data=output_dict,file_name='names',subdirectory=os.path.join('data','results','distance'))
+        with open(os.path.join('data','results','distance','names.json'), 'w') as json_file:
+            json.dump(output_dict, json_file)
+        return output_dict
 
-        try:
-            os.remove(source_path)
-        except:
-            pass
+    def preprocess_comparison_dict(self,output_dict):
+        #sum of dict
+        sum_dict = {}
+        # Iterate through the original dictionary
+        for outer_key, inner_dict in output_dict.items():
+            for inner_key, inner_value in inner_dict.items():
+                # Check if the inner key is already in sum_dict
+                if inner_key in sum_dict:
+                    sum_dict[inner_key] = int(sum_dict[inner_key] + inner_value)
+                else:
+                    sum_dict[inner_key] = int(inner_value)
 
-    def load_MFCC(self):
-        # Load the audio files
-        doc_audio_file=self.destination_path
-        sample_audio_file=r"data\audio_data\sample_audio_data\output_audio1.wav"
-        try:
-            doc_audio, sr_doc = librosa.load(doc_audio_file, sr=None)
-            sample_audio_file, sr_sample = librosa.load(sample_audio_file, sr=None)
-
-            # Extract MFCC features
-            mfcc_doc = librosa.feature.mfcc(y=doc_audio, sr=sr_doc)
-            mfcc_sample = librosa.feature.mfcc(y=sample_audio_file, sr=sr_sample)
-
-            # Transpose MFCCs for compatibility with DTW
-            mfcc_doc = mfcc_doc.T
-            mfcc_sample = mfcc_sample.T
-
-            # Calculate DTW distance and path
-            distance, path = fastdtw(mfcc_doc, mfcc_sample)
-
-            # Normalize the distance (optional)
-            normalized_distance = distance / min(len(mfcc_sample) , len(mfcc_doc))
-            print(normalized_distance)
-            return normalized_distance
-        except:
-            pass
-
-
-
-
-
-def get_file_paths_in_subfolder(folder_path):
-    file_paths = []
-
-    try:
-        # List all files in the subfolder
-        files = os.listdir(folder_path)
-
-        # Iterate over the files and construct full file paths
-        for file_name in files:
-            file_path = os.path.join(folder_path, file_name)
-            if os.path.isfile(file_path):
-                file_paths.append(file_path)
-
-    except Exception as e:
-        print(f"An error occurred: {str(e)}")
-
-    return file_paths
+        sorted_dict = dict(sorted(sum_dict.items(), key=lambda item: item[1]))
+        #utils.save_as_json(data=sum_dict,file_name='names',subdirectory=os.path.join('data','results','summed_distance'))
+        print('output= ', sorted_dict)
+        with open(os.path.join('data','results','summed_distance','summed distance.json'), 'w') as json_file:
+            json.dump(sorted_dict, json_file)
+    
+    def process(self):
+        self.collect_saved_names()
+        self.audio_saver()
+        output_dict = self.create_comparison_dictionary()
+        self.preprocess_comparison_dict(output_dict=output_dict)
 
 
-
-
-def clear_subfolder(folder_path):
-    try:
-        # List all files in the subfolder
-        files = os.listdir(folder_path)
-
-        # Iterate over the files and remove each one
-        for file_name in files:
-            file_path = os.path.join(folder_path, file_name)
-            if os.path.isfile(file_path):
-                os.remove(file_path)
-                print(f"Deleted: {file_path}")
-
-        print(f"Subfolder '{folder_path}' has been cleared.")
-    except Exception as e:
-        print(f"An error occurred: {str(e)}")
-
-def main():
-    # Usage example:
-    path_of_books = os.path.join("data","book")
-    file_paths = get_file_paths_in_subfolder(path_of_books)
-
-    # Now, you can loop over the file paths and perform actions on each file
-
-        # Perform actions on the file, such as reading, processing, or deleting
-
-
-    # Usage example:
-    #file_path = r"data\book\krishna volume1.txt"
-    list_of_doc = []
-    for file_path in file_paths:
-        list_of_doc += TextProcessor(file_path).process_file()
-    word_distance_dict = {}
-
-    # doc_set = set()
-    # for token in doc.ents:
-    #     doc_set.update(set(token.text))
-    for doc in list_of_doc:
-        for word in doc.ents:
-            if word.label_ in ('PERSON'):
-                try:
-                    word_distance_dict[word.text.lower()] = int(audio_converter(word.text).load_MFCC())
-                except:
-                    pass
-        with open('word_dist_dict_all.json', 'w') as json_file:
-            json.dump(word_distance_dict, json_file)
-            # Specify the file path where you want to save the dictionary as JSON
-            #word_distance_dict_path = os.path.join(os.path.join('data','match_details','word_dist_dict_all.json'))
-            # Save the dictionary as JSON to the file
-            with open('word_dist_dict_all.json', 'w') as json_file:
-                json.dump(word_distance_dict, json_file)
-
-        subfolder_path = os.path.join("data","audio_data","doc_audio_data")
-        clear_subfolder(subfolder_path)
 
 if __name__ == "__main__" :
-    main()
+    #save_modelnames_in_json(['vrindh','levik'])
+    
+    main().process()
+    #make a code to make folder names
+
