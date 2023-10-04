@@ -11,8 +11,6 @@ from fastdtw import fastdtw
 from gtts import gTTS
 from scipy.spatial.distance import euclidean
 from fastdtw import fastdtw
-from sklearn.preprocessing import StandardScaler
-from sklearn.metrics.pairwise import cosine_similarity
 
 
 
@@ -132,10 +130,10 @@ class TextProcessor:
     def process_file(self):
         file_contents = self.read_file()
         cleaned_text = self.clean_text(file_contents)
-        splitted_text = cleaned_text[:50000]
+        splitted_text = cleaned_text[:500000]
         #return self.tokenize_text(splitted_text)
 
-        self.chunksize = 50000
+        self.chunksize = 500000
 
         # # Split the document into chunks of 50,000 characters or less
         # print("splitting book into chunks..")
@@ -211,54 +209,26 @@ class WordsComparer():
         mfcc_doc = mfcc_doc.T
         return mfcc_doc
 
+    def compare_two_MFCC(self,mfcc1,mfcc2):  #get more information about this
+        def calculate_distance(mfcc1,mfcc2):
+            if mfcc1.shape[1] != mfcc2.shape[1]:
+                raise ValueError("Number of features (columns) must be the same for both sequences")
 
-    def compare_two_MFCC(self, mfcc1, mfcc2):
-        # Normalize the MFCCs
-        scaler = StandardScaler()
-        mfcc1_normalized = scaler.fit_transform(mfcc1)
-        mfcc2_normalized = scaler.transform(mfcc2)
-
-        # Calculate the cosine similarity between the normalized MFCCs
-        similarity = cosine_similarity(mfcc1_normalized, mfcc2_normalized)
-
-        # Scale the similarity to the range 0-100
-        scaled_distance = (1 - similarity) * 100
-
-        # Calculate the mean similarity score
-        mean_similarity = np.mean(scaled_distance)
-
-        # Adjust the mean similarity score based on the lengths of the MFCCs
-        length_difference = abs(len(mfcc1) - len(mfcc2))
-        adjusted_similarity = mean_similarity + length_difference
-
-        # Round the adjusted similarity to the nearest integer
-        rounded_adjusted_similarity = int(round(adjusted_similarity))
-
-        return rounded_adjusted_similarity
-
-        #return scaled_distance
-        #return distance
-
-        #dtw removed due to sensitive to lenght of names
-        # def calculate_distance(mfcc1,mfcc2):
-        #     if mfcc1.shape[1] != mfcc2.shape[1]:
-        #         raise ValueError("Number of features (columns) must be the same for both sequences")
-
-        #         # Calculate the DTW distance using the fastdtw function
-        #     distance, _ = fastdtw(mfcc1, mfcc2)
-        #     # Calculate DTW distance and path
+                # Calculate the DTW distance using the fastdtw function
+            distance, _ = fastdtw(mfcc1, mfcc2)
+            # Calculate DTW distance and path
   
-            #return distance
-        
+            #print("mfcc1 shape= ",mfcc1.shape[1],"distance= ",distance)
+            #print(distance)
+            return distance
 
-        # distance = calculate_distance(mfcc1,mfcc2)
-        # #print(distance)
-        # # Normalize the distance (optional)
-        # normalised_distance = distance / min(len(mfcc1) , len(mfcc2))
-        # normalised_distance = round(normalised_distance,2)
-
+        distance = calculate_distance(mfcc1,mfcc2)
+        #print(distance)
+        # Normalize the distance (optional)
+        normalised_distance = distance / min(len(mfcc1) , len(mfcc2))
+        normalised_distance = round(normalised_distance,2)
         
-        # return normalised_distance
+        return distance
 
     # def word_to_mfcc(self, word):
     #     audio_converter = AudioConverter(word,'gtts')

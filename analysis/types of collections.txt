@@ -1,0 +1,19 @@
+There are four mode of name collections:
+
+    1) Krishna specific names
+        sources:
+            named entities collected from krishna fiction and non-fiction books
+            krishna names collected from online name sources
+
+    2) General sanskrit words
+        sources:
+            collected from sanskrit dictionary
+
+    3) General malayalam words
+        sources:
+            collected from malayalam dictionary
+    
+    4)generic and krishna names
+        sources: websites and prayers
+
+    5)sanskrit prayers and such

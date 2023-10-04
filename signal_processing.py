@@ -8,11 +8,11 @@ import json
 import utils
 from gtts import gTTS 
 
-def save_modelnames_in_json(data):
-    utils.save_as_json(data=data,
-                        file_name= 'model_names',
-                        subdirectory= os.path.join('data','model_names'))
-#save_names_in_json()
+def save_modelnames_in_json(data,file_name= os.path.join('data','model_names','model_names.json')):
+    with open(file_name, 'w') as json_file:
+        json.dump(data, json_file)
+
+
 
 class main():
     def collect_saved_names(self):
@@ -49,6 +49,18 @@ class main():
         return output_dict
 
     def preprocess_comparison_dict(self,output_dict):
+
+        def normalise_dict(dict):
+            decimal_point_for_factor= len(dict.values())/10 #make sure the count of names is above 10 for intuitive understanding
+            factor= decimal_point_for_factor/sum(dict.values())
+            for k in dict:
+                dict[k] = dict[k]*factor
+            return dict
+        
+        for key, inner_dict in output_dict.items(): #normalise each dict_values for summation
+            output_dict[key] = normalise_dict(inner_dict)
+
+
         #sum of dict
         sum_dict = {}
         # Iterate through the original dictionary
@@ -56,12 +68,13 @@ class main():
             for inner_key, inner_value in inner_dict.items():
                 # Check if the inner key is already in sum_dict
                 if inner_key in sum_dict:
-                    sum_dict[inner_key] = int(sum_dict[inner_key] + inner_value)
+                    sum_dict[inner_key] = sum_dict[inner_key] + inner_value
                 else:
-                    sum_dict[inner_key] = int(inner_value)
+                    sum_dict[inner_key] = inner_value
 
         sorted_dict = dict(sorted(sum_dict.items(), key=lambda item: item[1]))
         #utils.save_as_json(data=sum_dict,file_name='names',subdirectory=os.path.join('data','results','summed_distance'))
+        print('names= ',[name for name in output_dict.keys()], "words= ", len(sorted_dict.values()), "sum= ", sum(sorted_dict.values()))
         print('output= ', sorted_dict)
         with open(os.path.join('data','results','summed_distance','summed distance.json'), 'w') as json_file:
             json.dump(sorted_dict, json_file)
@@ -75,8 +88,9 @@ class main():
 
 
 if __name__ == "__main__" :
+    pass
     #save_modelnames_in_json(['vrindh','levik'])
-    
-    main().process()
+
+    #main().process()
     #make a code to make folder names
 

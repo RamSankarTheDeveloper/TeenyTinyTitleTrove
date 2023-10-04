@@ -24,11 +24,14 @@ class WordCollector:
         for each_book_path in utils.return_each_files_path(directory):
             text_processor = utils.TextProcessor(each_book_path)
             for text_chunk in text_processor.process_file():
-                yield text_chunk
+                yield each_book_path, text_chunk
 
     def extract_NER_from_text(self,text_chunk):#ENTITY CHANGE        
         doc_chunk = self.nlp(text_chunk)
-        person_names =list(set([ent.text for ent in doc_chunk.ents if ent.label_ == 'PERSON']))
+        person_names =list(set([ent.text for ent in doc_chunk.ents if ent.label_ 
+                                #== 'PERSON']
+                                not in ("DATE", "TIME", "MONEY", "PERCENT")
+                                ]))
         return ( 'person_names',person_names)
     
     def extract_tokens_from_text(self,text_chunk):      
@@ -79,13 +82,16 @@ class WordCollector:
     def process(self):  #main file that is not resuable. others int this classes is slightly reusable
         for each_folder in [self.book_directory_for_stories,self.book_directory_for_namebooks]:
             if each_folder == self.book_directory_for_stories:
-                for each_text_chunk in self.books_chunking(self.book_directory_for_stories):
+                for book_path, each_text_chunk in self.books_chunking(self.book_directory_for_stories):
+                    print(f'accessing book chunk..')
                     file_name,file = self.extract_NER_from_text(text_chunk= each_text_chunk)
                     utils.save_as_json(data= file, file_name= file_name, subdirectory= self.directory_to_save_collected_words)
+                    print("opened_file= ", book_path)
             if each_folder == self.book_directory_for_namebooks:
-                for each_text_chunk in self.books_chunking(self.book_directory_for_namebooks):
+                for book_path, each_text_chunk in self.books_chunking(self.book_directory_for_namebooks):
                     file_name,file = self.extract_tokens_from_text(text_chunk= each_text_chunk)
                     utils.save_as_json(data= file, file_name= file_name, subdirectory= self.directory_to_save_collected_words)
+                    print("opened_file= ", book_path)
             
         self.preprocess_names_in_json(os.path.join(self.directory_to_save_collected_words,'person_names.json'))
 
