@@ -11,7 +11,20 @@ from fastdtw import fastdtw
 from gtts import gTTS
 from scipy.spatial.distance import euclidean
 from fastdtw import fastdtw
+import shutil
+import config
 
+
+def create_folder_if_not_exists(folder_path):
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+
+def move_files(source_filepath, destination_directory): #note that one is filepath and other is directory
+    shutil.move(source_filepath, destination_directory)
+
+    # Optional: Check if the file was moved successfully
+    if os.path.exists(source_filepath):
+        print("File move failed.")
 
 
 def return_each_files_path(subfolder_path, return_type='full path'):
@@ -106,10 +119,9 @@ def save_as_json(data, file_name, subdirectory):
 #     print("Failed to save or append data.")
 
 class TextProcessor:
-    def __init__(self, file_path = r"data\book\krishna volume1.txt", chunksize = 50000):
+    def __init__(self, chunksize = 50000):
         self.chunksize = chunksize
-        self.file_path = file_path
-        self.nlp = spacy.load("en_core_web_sm")
+        self.nlp = spacy.load("en_core_web_lg",disable=["tagger", "parser", "textcat"])
 
     def read_file(self):
         with open(self.file_path, "r",errors='ignore') as file:
@@ -127,13 +139,14 @@ class TextProcessor:
         doc = self.nlp(text)
         return doc
 
-    def process_file(self):
+    def process_file(self,file_path):
+        self.file_path= file_path
         file_contents = self.read_file()
         cleaned_text = self.clean_text(file_contents)
-        splitted_text = cleaned_text[:500000]
+        splitted_text = cleaned_text[:50000]
         #return self.tokenize_text(splitted_text)
 
-        self.chunksize = 500000
+        self.chunksize = 50000
 
         # # Split the document into chunks of 50,000 characters or less
         # print("splitting book into chunks..")
@@ -147,10 +160,10 @@ class TextProcessor:
             yield text_chunk
 
 class AudioConverter():
-    def __init__(self, word, engine, save_directory=['data','audio_data','doc_audio_data']):
+    def __init__(self, word, engine, save_directory= config.paths["save_directory"]):
         word = word.lower()
-        file_path = save_directory+[f"{word}.wav"]
-        self.file_path = os.path.join(*file_path)
+        file_path = save_directory+os.sep+ f"{word}{config.audio_format}"
+        self.file_path = file_path
         self.word = word
         self.engine = engine
 
@@ -163,9 +176,9 @@ class AudioConverter():
                 print(f"unable to save '{self.word}' due to : {str(e)}")
 
         elif self.engine == "pyttsx3":#note that this have to be deleted lately because the storage is high(ten times larger than gtts, but quicker and offline)
-            file_name = f"{self.word}.wav"
+            file_name = f"{self.word}{config.audio_format}"
             engine = pyttsx3.init()
-            engine.save_to_file(self.word, file_name)
+            engine.save_to_file(self.word, self.file_path)
             engine.runAndWait()
         print("sended file path= ", self.file_path)
 
@@ -182,7 +195,7 @@ class WordsComparer():
     # def convert_to_audio(self, word, engine):
 
     #     if engine == "gtts":
-    #         file_path = os.path.join('data','audio_data','doc_audio_data',f"{word}.wav")
+    #         file_path = os.path.join('data_christian','audio_data','doc_audio_data',f"{word}.wav")
     #         try: #consider this as an additional filter for collected names
     #             tts = gTTS(word)
     #             tts.save(file_path)
@@ -228,7 +241,7 @@ class WordsComparer():
         normalised_distance = distance / min(len(mfcc1) , len(mfcc2))
         normalised_distance = round(normalised_distance,2)
         
-        return distance
+        return normalised_distance
 
     # def word_to_mfcc(self, word):
     #     audio_converter = AudioConverter(word,'gtts')
