@@ -104,6 +104,7 @@ def save_as_json(data, file_name, subdirectory):
         return file_path  # Return the saved file path
     except Exception as e:
         print(f"An error occurred in saving json: {str(e)}")
+        print(f"An error occurred in saving json: {str(e)}")
         return None
 
 
@@ -129,6 +130,10 @@ class TextProcessor:
         return file_contents
 
     def clean_text(self, text):
+        cleaned_text = re.sub(r'\n', '. ', text)
+        #cleaned_text = re.sub(r'[^\n]', '. ', text)
+        cleaned_text = re.sub(r'[&]', ' and ', cleaned_text)
+        cleaned_text = re.sub(r'[^a-zA-Z.();,?\'\"]', ' ', cleaned_text)
         cleaned_text = re.sub(r'\n', '. ', text)
         #cleaned_text = re.sub(r'[^\n]', '. ', text)
         cleaned_text = re.sub(r'[&]', ' and ', cleaned_text)
