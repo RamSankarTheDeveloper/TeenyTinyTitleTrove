@@ -1,4 +1,3 @@
-﻿# TeenyTinyTitleTrove
 # TinyTitleTrove
 'TinyTitleTrove' is a name finder tool made as a support for my data analysis project, 'TinyTitle'. Its primary purpose was to help me find names that pronounce similarly to character names from specific backgrounds, such as ideology, field, religion, century, fantasy, or country.
 
