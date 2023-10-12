@@ -8,7 +8,7 @@ TinyTitleTrove is a name finder tool designed for assisting users in finding nam
 - [Features](#features)
 - [How to Use](#how-to-use)
 - [Note](#Note)
-- [sample output](#sample output)
+- [sample output](#sample-output)
 - [License](#license)
 
 ## Introduction
@@ -33,7 +33,7 @@ Not made for direct use. Output needs further processings.
 default is low quality pyttsx3 engine(60% accuracy for non english words). recommended to use gtts api if can for best results.
 
 
-## sample-output
+## sample output
 sample output(top few names) result for sandeep made in low quality pyttsx3:["santhi", "samvid", "santu", "sannati", "suddhi", "ciiti", "suffi", "saivya", "sundah", "suka", "sarpi", "sauti", "sanketa", "safi", "sande", "sandhi", "saddhya", "sayya", "sunder", "sanju", "sun  the", "suddhah", "saryu", "sivi", "sitaya", "saika", "saungi", "saadhvi", "sannivi", "supta", "saatvik", "satvik", "sapia", "syood", "sutji", "syiim", "syiin", "sakadh", "sunu", "sivya", "sasi", "sumna", "saikya", "sowkhya", "sanniv", "sutap", "samu", "santi", "sapya", "secti", "siaht", "sigheth", "sindhu", "sani", "sunda", "satya", "sonia", "saliga", "satyaki", "sipi", "syiid", "sindu", "sakyap", "sinec", "ciimia", "sadhu", "sarathi", "sibi", "samik", "tandi", "subhiin", "tiie", "simhaya", "sairya", "sandhya", "suhtra", "silaki", "sangat", "stutaya", "sudhama", "sanny", "syiit", "suni", "ciinya", "sonita", "syeni", "siong", "sito", "samiine", "samii", "satam", "xlii", "suddhena", "sudhana", "saktaya", "sanjayet", "sabdyate", "sunrta", "sthiini", "tunda", "kandi", "samiuddhi", "sanda", "satha", "saka", "sautabhi", "samiidhi", "sakti", "sudharma", "somay", "sarga", "summoneth", "samkha", "sakya", "syed", "saugandhi", "sadhri", "saiva", "certai", "navadeep", "sadhva", "sini", "santim", "thiki", "truwti", "shanthi", "soga", "ciinan", "samputa", "satyak", "sauchiti", "santih", "sunrita", "sundarim", "sudeshaya", "chindhi", "sree", "sri", "siuikhya", "samadhi", "saman", "cyam", "samedi", "suki", "suhma", "suta", "samprati", "sankhya", "sachi", "sthiti", "surya", "sambhuti", "diyate", "sankalp", "sruthi", "slee", "sushen", "kauneya", "stoka", "xion", "simhika", "suca", "sauryam", "shringi", "sanaat", "samika", "divy", "sambaya", "syiima", "sanskriti", "stallion", "sahadev", "sahdev", "sahgo", "sorria", "sarayti", "sata", "satah", "sarying", "sakheva", "sampat", "samhitam", "sevika", "santanu", "sarhhi", "sute", "chandi", "snia", "samata", "sammitah", "sanka", "sattvic", "satadri", "ciitur", "silina", "syena", "sankha", "saunka", "sanaka", "sambhu", "citya", "sitya", "synod", "santa", "santah", "sarnga", "srinoti", "ciii", "jaaya", "sandhaya", "senayor", "saroii", "sankhini", "suddham", "sankar", "saama", "sama", "subhima", "sarva", "dandi", "shaivya", "dufi", "sankata", "savdah", "subala", "sumad", "santan", "sivini", "sarvadi", "sathya", "sampaka", "sathvic", "subtil", "samudb", "tyat", "sakhin", "shaivite", "cintam", "sunita", "satta", "saba", "samhata", "cedi", "sola", "sayti", "samana", "salya", "gouni", "sanhita", "scion", 
 
 ## license:
